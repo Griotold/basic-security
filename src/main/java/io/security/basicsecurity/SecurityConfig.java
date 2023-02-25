@@ -33,9 +33,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .formLogin();
 
+        // 세션 고정 보호 : 세션 고정 공격 방어 기능
         http
                 .sessionManagement()
-                .maximumSessions(1) // 최대 허용 세션 개수 1개
-                .maxSessionsPreventsLogin(true); // 2.전략 : 현재 사용자 인증 실패 전략
+                // .sessionFixation().none(); -> 세션 고정 공격에 속수무책으로 당한다.
+                .sessionFixation().changeSessionId(); // 인증 할 때마다 세션 ID가 바뀐다.
     }
 }
