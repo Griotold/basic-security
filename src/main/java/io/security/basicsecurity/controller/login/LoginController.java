@@ -1,19 +1,28 @@
 package io.security.basicsecurity.controller.login;
 
+import io.security.basicsecurity.domain.Account;
 import lombok.Getter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Controller
 public class LoginController {
+    // http://localhost:8080/login?error=true&exception=Invalid%20Username%20or%20Password2
     @GetMapping("/login")
-    public String login() {
+    public String login(@RequestParam(value = "error", required = false) String error,
+                        @RequestParam(value = "exception", required = false) String exception,
+                        Model model) {
+        // 인증실패시 에러와 예외를 화면에 던져주기
+        model.addAttribute("error", error);
+        model.addAttribute("exception", exception);
         return "/user/login/login";
     }
 
@@ -26,5 +35,18 @@ public class LoginController {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
         return "redirect:/login";
+    }
+
+    @GetMapping("/denied")
+    public String accessDenied(@RequestParam(value = "exception", required = false) String exception,
+                               Model model) {
+        // 인증 객체 가져오기 : 화면에 username 뿌려주기 위해
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Object principal = authentication.getPrincipal();
+        Account account = (Account) authentication.getPrincipal();
+        model.addAttribute("username", account.getUsername());
+        model.addAttribute("exception", exception);
+        return "user/login/denied";
     }
 }
